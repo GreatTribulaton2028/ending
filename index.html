@@ -239,6 +239,17 @@ html, body {
     .counter-toggle:focus {
         outline: 2px solid var(--c-cyber);
         outline-offset: 2px;
+        padding: 6px 8px;
+        margin-top: 6px;
+    }
+    
+    .counter-toggle:focus {
+        outline: 3px solid var(--c-cyber);
+        outline-offset: 3px;
+    }
+    
+    .counter-item {
+        margin: 6px 0;
     }
 }
 
@@ -268,6 +279,23 @@ textarea:focus,
 .immersive-close:focus {
     outline: 2px solid var(--c-cyber);
     outline-offset: 2px;
+    outline: 3px solid var(--c-cyber);
+    outline-offset: 3px;
+}
+
+button:focus-visible,
+a:focus-visible,
+textarea:focus-visible,
+.immersive-close:focus-visible {
+    outline: 3px solid var(--c-cyber);
+    outline-offset: 3px;
+}
+
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+.immersive-close:focus:not(:focus-visible) {
+    outline: none;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -677,6 +705,9 @@ main {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   語言切換器
+   ═══════════════════════════════════════════════════════════ */
+#language-switcher {
    Language Switcher
    ═══════════════════════════════════════════════════════════ */
 .lang-switcher {
@@ -689,11 +720,28 @@ main {
     background: rgba(0, 0, 0, 0.7);
     padding: 8px 12px;
     border-radius: 8px;
+    border: 1px solid rgba(0, 243, 255, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
 }
 
 .lang-btn {
+    font-family: var(--f-tech);
+    font-size: 12px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--c-text-dim);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.lang-btn:hover {
+    background: rgba(0, 243, 255, 0.1);
+    color: var(--c-cyber);
+    border-color: var(--c-cyber);
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: var(--c-text-dim);
@@ -709,17 +757,30 @@ main {
     border-color: var(--c-cyber);
     color: var(--c-cyber);
     background: rgba(0, 243, 255, 0.1);
+    background: rgba(0, 243, 255, 0.15);
+    transform: translateY(-1px);
 }
 
 .lang-btn.active {
     background: var(--c-cyber);
     color: var(--c-void);
     border-color: var(--c-cyber);
+    font-weight: 600;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    #language-switcher {
 }
 
 .lang-btn:focus {
     outline: 2px solid var(--c-cyber);
     outline-offset: 2px;
+    outline-offset: 3px;
+}
+
+.lang-btn:focus:not(:focus-visible) {
+    outline: none;
 }
 
 [data-lang] {
@@ -752,6 +813,8 @@ a[data-lang].active {
     }
     
     .lang-btn {
+        font-size: 10px;
+        padding: 4px 8px;
         padding: 4px 8px;
         font-size: 11px;
     }
@@ -767,6 +830,20 @@ a[data-lang].active {
     <button class="lang-btn" data-lang-switch="en" onclick="switchLanguage('en')" aria-label="Switch to English">EN</button>
 </div>
 
+    <button class="lang-btn active" data-lang-switch="zh-TW" onclick="switchLanguage('zh-TW')" aria-label="切換至繁體中文">繁體</button>
+    <button class="lang-btn" data-lang-switch="zh-CN" onclick="switchLanguage('zh-CN')" aria-label="切换至简体中文">简体</button>
+    <button class="lang-btn" data-lang-switch="en" onclick="switchLanguage('en')" aria-label="Switch to English">EN</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     語言切換器
+     ═══════════════════════════════════════════════════════════ -->
+<div id="language-switcher">
+    <button class="lang-btn active" data-lang="zh-TW" onclick="switchLanguage('zh-TW')">繁</button>
+    <button class="lang-btn" data-lang="zh-CN" onclick="switchLanguage('zh-CN')">简</button>
+    <button class="lang-btn" data-lang="en" onclick="switchLanguage('en')">EN</button>
+</div>
+
 <!-- ═══════════════════════════════════════════════════════════
      靈魂粒子背景
      ═══════════════════════════════════════════════════════════ -->
@@ -778,14 +855,14 @@ a[data-lang].active {
 <div id="opening-overlay">
     <canvas id="opening-effect"></canvas>
     <div class="opening-content">
-        <div class="opening-fixed-title">『今生與永恆，甦醒與昏沉』</div>
-        <div class="opening-fixed-sub">生死‧只在一線之差</div>
+        <div class="opening-fixed-title" data-i18n="opening-fixed-title">『今生與永恆，甦醒與昏沉』</div>
+        <div class="opening-fixed-sub" data-i18n="opening-fixed-sub">生死‧只在一線之差</div>
         <div class="opening-divider"></div>
         <div class="opening-main" id="opening-main"></div>
         <div class="opening-sub" id="opening-sub"></div>
         <div class="opening-verse" id="opening-verse"></div>
     </div>
-    <div class="enter-hint">[ 點 擊 進 入 ]</div>
+    <div class="enter-hint" data-i18n="enter-hint">[ 點 擊 進 入 ]</div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -793,6 +870,16 @@ a[data-lang].active {
      ═══════════════════════════════════════════════════════════ -->
 <div id="death-counter" role="region" aria-label="全球死亡統計">
     <div class="counter-item">
+        <span class="counter-label" data-i18n="counter-label-1">你進入後，全球已有</span>
+        <span class="counter-value" id="death-since-entry">0</span>
+        <span class="counter-label" data-i18n="counter-unit-1">人死亡</span>
+    </div>
+    <div class="counter-item">
+        <span class="counter-label" data-i18n="counter-label-2">今日全球約</span>
+        <span class="counter-value" id="death-today">0</span>
+        <span class="counter-label" data-i18n="counter-unit-2">人離世</span>
+    </div>
+    <div class="counter-since" data-i18n="counter-since">（每秒約 1.8 人・WHO 全球死亡率估算）</div>
         <span class="counter-label">你進入後，全球已有</span>
         <span class="counter-value" id="death-since-entry" aria-live="polite">0</span>
         <span class="counter-label">人死亡</span>
@@ -804,6 +891,7 @@ a[data-lang].active {
     </div>
     <div class="counter-since">（每秒約 1.8 人・WHO 全球死亡率估算）</div>
     <button class="counter-toggle" onclick="toggleCounter()" aria-label="展開或收合死亡計數器">▼</button>
+    <button class="counter-toggle" onclick="toggleCounter()" aria-label="展開死亡計數器" aria-expanded="false">▼</button>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -811,11 +899,11 @@ a[data-lang].active {
      ═══════════════════════════════════════════════════════════ -->
 <main>
     <div class="portal-header">
-        <h1 class="portal-title">生 死 之 間</h1>
+        <h1 class="portal-title" data-i18n="portal-title">生 死 之 間</h1>
         <p class="portal-subtitle">
-            每一天，全球約有 15 萬人離開這個世界<br>
-            他們之中，有多少人預備好了？<br>
-            你呢？
+            <span data-i18n="portal-subtitle-1">每一天，全球約有 15 萬人離開這個世界</span><br>
+            <span data-i18n="portal-subtitle-2">他們之中，有多少人預備好了？</span><br>
+            <span data-i18n="portal-subtitle-3">你呢？</span>
         </p>
     </div>
 
@@ -823,50 +911,54 @@ a[data-lang].active {
         <!-- 宏觀：七災年時間軸 -->
         <a href="timeline.html" class="gate-card macro">
             <div class="gate-icon">📜</div>
-            <div class="gate-title">THE TRIBULATION</div>
-            <div class="gate-subtitle">七 災 年 時 間 軸</div>
+            <div class="gate-title" data-i18n="gate-title-1">THE TRIBULATION</div>
+            <div class="gate-subtitle" data-i18n="gate-subtitle-1">七 災 年 時 間 軸</div>
             <div class="gate-desc">
-                2019 瘟疫 → 2027 吹角節<br>
-                四馬、七印、七號<br>
-                宏觀預言與現實的對照
+                <span data-i18n="gate-desc-1-1">2019 瘟疫 → 2027 吹角節</span><br>
+                <span data-i18n="gate-desc-1-2">四馬、七印、七號</span><br>
+                <span data-i18n="gate-desc-1-3">宏觀預言與現實的對照</span>
             </div>
         </a>
 
         <!-- 微觀：生死記錄儀 -->
         <a href="monitor.html" class="gate-card micro">
             <div class="gate-icon">☠️</div>
-            <div class="gate-title">VITAL LIFE MONITOR</div>
-            <div class="gate-subtitle">生 死 記 錄 儀</div>
+            <div class="gate-title" data-i18n="gate-title-2">VITAL LIFE MONITOR</div>
+            <div class="gate-subtitle" data-i18n="gate-subtitle-2">生 死 記 錄 儀</div>
             <div class="gate-desc">
-                每一條新聞，都是一個完整人生的終結<br>
-                今天的頭條，明天可能是你<br>
-                個體死亡事件追蹤
+                <span data-i18n="gate-desc-2-1">每一條新聞，都是一個完整人生的終結</span><br>
+                <span data-i18n="gate-desc-2-2">今天的頭條，明天可能是你</span><br>
+                <span data-i18n="gate-desc-2-3">個體死亡事件追蹤</span>
             </div>
         </a>
 
         <!-- 靈魂：如果是你 -->
         <div class="gate-card soul" onclick="startImmersive()">
             <div class="gate-icon">💭</div>
-            <div class="gate-title">IF IT WERE YOU</div>
-            <div class="gate-subtitle">如 果 是 你</div>
+            <div class="gate-title" data-i18n="gate-title-3">IF IT WERE YOU</div>
+            <div class="gate-subtitle" data-i18n="gate-subtitle-3">如 果 是 你</div>
             <div class="gate-desc">
-                給自己 3 分鐘<br>
-                認真思考一個你一直逃避的問題<br>
-                靈魂的去處
+                <span data-i18n="gate-desc-3-1">給自己 3 分鐘</span><br>
+                <span data-i18n="gate-desc-3-2">認真思考一個你一直逃避的問題</span><br>
+                <span data-i18n="gate-desc-3-3">靈魂的去處</span>
             </div>
         </div>
     </div>
 
     <div class="portal-footer">
         <div class="footer-quote">
-            「人若賺得全世界，賠上自己的生命，有甚麼益處呢？<br>
-            人還能拿甚麼換生命呢？」
-            <span class="footer-ref">— 馬太福音 16:26</span>
+            <span data-i18n="footer-quote-1">「人若賺得全世界，賠上自己的生命，有甚麼益處呢？</span><br>
+            <span data-i18n="footer-quote-2">人還能拿甚麼換生命呢？」</span>
+            <span class="footer-ref" data-i18n="footer-ref">— 馬太福音 16:26</span>
         </div>
     </div>
 </main>
 
 <!-- Placeholder Image Section -->
+<!-- Placeholder Image Section
+     Source: Unsplash (https://unsplash.com/photos/L7en7Lb-Ovc)
+     TODO: Replace with owner's choice of image that represents spirituality/theology
+     Current placeholder is free to use via Unsplash License -->
 <div class="placeholder-section" style="position: relative; z-index: 1; padding: 20px;">
     <img 
         src="https://images.unsplash.com/photo-1519834785169-98be25ec3f84?w=1200&h=400&fit=crop" 
@@ -1111,6 +1203,7 @@ a[data-lang].active {
                         loading="lazy"
                         title="五色的福音 - 粵語福音視頻"
                         aria-label="五色的福音粵語版視頻">
+                        aria-label="五色的福音粵語版視頻 - 點擊播放">
                     </iframe>
                 </div>
                 
@@ -1123,6 +1216,7 @@ a[data-lang].active {
                         loading="lazy"
                         title="福音橋 - 國語福音視頻"
                         aria-label="福音橋國語版視頻">
+                        aria-label="福音橋國語版視頻 - 點擊播放">
                     </iframe>
                 </div>
             </div>
@@ -1130,6 +1224,8 @@ a[data-lang].active {
             <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
                 <button class="immersive-btn primary" onclick="returnToPortal()" aria-label="返回主頁">返回主頁</button>
                 <button class="immersive-btn" onclick="nextStage(3)" aria-label="重新開始靈性探索">重新探索</button>
+                <button class="immersive-btn primary" onclick="returnToPortal()" aria-label="返回網站主頁">返回主頁</button>
+                <button class="immersive-btn" onclick="nextStage(3)" aria-label="重新開始靈性探索旅程">重新開始探索</button>
             </div>
         </div>
 
@@ -1451,6 +1547,11 @@ function toggleCounter() {
     } else {
         toggle.textContent = '▲';
         toggle.setAttribute('aria-label', '收合死亡計數器');
+        toggle.setAttribute('aria-expanded', 'false');
+    } else {
+        toggle.textContent = '▲';
+        toggle.setAttribute('aria-label', '收合死亡計數器');
+        toggle.setAttribute('aria-expanded', 'true');
     }
 }
 
@@ -1562,6 +1663,7 @@ const isMobile = window.innerWidth <= 768;
 if (isReducedMotion || isMobile) {
     // This will be used in particle initialization below
     window.particleReductionFactor = isReducedMotion ? 0.3 : (isMobile ? 0.5 : 1);
+    window.particleReductionFactor = isReducedMotion ? 0.24 : (isMobile ? 0.4 : 1);
 }
 
 </script>
@@ -5848,6 +5950,134 @@ if (isReducedMotion || isMobile) {
     delete window.__iframeHighlightCleanup;
   };
 })();
+
+// ═══════════════════════════════════════════════════════════
+// 多語言系統
+// ═══════════════════════════════════════════════════════════
+const translations = {
+    'zh-TW': {
+        'page-title': '生死之間 | Between Life and Death',
+        'opening-fixed-title': '『今生與永恆，甦醒與昏沉』',
+        'opening-fixed-sub': '生死‧只在一線之差',
+        'enter-hint': '[ 點 擊 進 入 ]',
+        'counter-label-1': '你進入後，全球已有',
+        'counter-unit-1': '人死亡',
+        'counter-label-2': '今日全球約',
+        'counter-unit-2': '人離世',
+        'counter-since': '（每秒約 1.8 人・WHO 全球死亡率估算）',
+        'portal-title': '生 死 之 間',
+        'portal-subtitle-1': '每一天，全球約有 15 萬人離開這個世界',
+        'portal-subtitle-2': '他們之中，有多少人預備好了？',
+        'portal-subtitle-3': '你呢？',
+        'gate-title-1': 'THE TRIBULATION',
+        'gate-subtitle-1': '七 災 年 時 間 軸',
+        'gate-desc-1-1': '2019 瘟疫 → 2027 吹角節',
+        'gate-desc-1-2': '四馬、七印、七號',
+        'gate-desc-1-3': '宏觀預言與現實的對照',
+        'gate-title-2': 'VITAL LIFE MONITOR',
+        'gate-subtitle-2': '生 死 記 錄 儀',
+        'gate-desc-2-1': '每一條新聞，都是一個完整人生的終結',
+        'gate-desc-2-2': '今天的頭條，明天可能是你',
+        'gate-desc-2-3': '個體死亡事件追蹤',
+        'gate-title-3': 'IF IT WERE YOU',
+        'gate-subtitle-3': '如 果 是 你',
+        'gate-desc-3-1': '給自己 3 分鐘',
+        'gate-desc-3-2': '認真思考一個你一直逃避的問題',
+        'gate-desc-3-3': '靈魂的去處',
+        'footer-quote-1': '「人若賺得全世界，賠上自己的生命，有甚麼益處呢？',
+        'footer-quote-2': '人還能拿甚麼換生命呢？」',
+        'footer-ref': '— 馬太福音 16:26'
+    },
+    'zh-CN': {
+        'page-title': '生死之间 | Between Life and Death',
+        'opening-fixed-title': '『今生与永恒，苏醒与昏沉』',
+        'opening-fixed-sub': '生死‧只在一线之差',
+        'enter-hint': '[ 点 击 进 入 ]',
+        'counter-label-1': '你进入后，全球已有',
+        'counter-unit-1': '人死亡',
+        'counter-label-2': '今日全球约',
+        'counter-unit-2': '人离世',
+        'counter-since': '（每秒约 1.8 人・WHO 全球死亡率估算）',
+        'portal-title': '生 死 之 间',
+        'portal-subtitle-1': '每一天，全球约有 15 万人离开这个世界',
+        'portal-subtitle-2': '他们之中，有多少人预备好了？',
+        'portal-subtitle-3': '你呢？',
+        'gate-title-1': 'THE TRIBULATION',
+        'gate-subtitle-1': '七 灾 年 时 间 轴',
+        'gate-desc-1-1': '2019 瘟疫 → 2027 吹角节',
+        'gate-desc-1-2': '四马、七印、七号',
+        'gate-desc-1-3': '宏观预言与现实的对照',
+        'gate-title-2': 'VITAL LIFE MONITOR',
+        'gate-subtitle-2': '生 死 记 录 仪',
+        'gate-desc-2-1': '每一条新闻，都是一个完整人生的终结',
+        'gate-desc-2-2': '今天的头条，明天可能是你',
+        'gate-desc-2-3': '个体死亡事件追踪',
+        'gate-title-3': 'IF IT WERE YOU',
+        'gate-subtitle-3': '如 果 是 你',
+        'gate-desc-3-1': '给自己 3 分钟',
+        'gate-desc-3-2': '认真思考一个你一直逃避的问题',
+        'gate-desc-3-3': '灵魂的去处',
+        'footer-quote-1': '「人若赚得全世界，赔上自己的生命，有什么益处呢？',
+        'footer-quote-2': '人还能拿什么换生命呢？」',
+        'footer-ref': '— 马太福音 16:26'
+    },
+    'en': {
+        'page-title': 'Between Life and Death',
+        'opening-fixed-title': '『 This Life & Eternity, Awake & Asleep 』',
+        'opening-fixed-sub': 'Life & Death・Only a Thin Line Apart',
+        'enter-hint': '[ C L I C K   T O   E N T E R ]',
+        'counter-label-1': 'Since you entered,',
+        'counter-unit-1': 'people died globally',
+        'counter-label-2': 'Today, approximately',
+        'counter-unit-2': 'people passed away',
+        'counter-since': '(~1.8 per second・WHO Global Mortality Est.)',
+        'portal-title': 'BETWEEN LIFE & DEATH',
+        'portal-subtitle-1': 'Every day, about 150,000 people leave this world',
+        'portal-subtitle-2': 'How many of them were prepared?',
+        'portal-subtitle-3': 'Are you?',
+        'gate-title-1': 'THE TRIBULATION',
+        'gate-subtitle-1': 'Seven-Year Timeline',
+        'gate-desc-1-1': '2019 Plague → 2027 Feast of Trumpets',
+        'gate-desc-1-2': 'Four Horses, Seven Seals, Seven Trumpets',
+        'gate-desc-1-3': 'Prophecy vs. Reality',
+        'gate-title-2': 'VITAL LIFE MONITOR',
+        'gate-subtitle-2': 'Life & Death Monitor',
+        'gate-desc-2-1': 'Every news story marks the end of a life',
+        'gate-desc-2-2': "Today's headline could be you tomorrow",
+        'gate-desc-2-3': 'Individual Death Event Tracking',
+        'gate-title-3': 'IF IT WERE YOU',
+        'gate-subtitle-3': 'If It Were You',
+        'gate-desc-3-1': 'Give yourself 3 minutes',
+        'gate-desc-3-2': 'To seriously think about a question you\'ve been avoiding',
+        'gate-desc-3-3': 'Where does your soul go?',
+        'footer-quote-1': '"For what will it profit a man if he gains the whole world and forfeits his soul?',
+        'footer-quote-2': 'Or what shall a man give in return for his soul?"',
+        'footer-ref': '— Matthew 16:26'
+    }
+};
+
+function switchLanguage(lang) {
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-lang') === lang) {
+            btn.classList.add('active');
+        }
+    });
+    localStorage.setItem('preferred-language', lang);
+    document.title = translations[lang]['page-title'];
+    document.documentElement.lang = lang === 'zh-TW' ? 'zh-HK' : lang === 'zh-CN' ? 'zh-CN' : 'en';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+            el.innerHTML = translations[lang][key];
+        }
+    });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    const savedLang = localStorage.getItem('preferred-language') || 'zh-TW';
+    switchLanguage(savedLang);
+});
 
 </script>
 </body>
