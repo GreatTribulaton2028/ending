@@ -1457,7 +1457,7 @@ let filteredEvents = [];
 
 // Pagination variables
 let currentPage = 1;
-let itemsPerPage = 50; // Default batch size
+let itemsPerPage = 30; // Default batch size (reduced from 50 for better UX)
 let totalPages = 1;
 let candleCounts = JSON.parse(localStorage.getItem('candleCounts') || '{}');
 let totalCandles = Object.values(candleCounts).reduce((a, b) => a + b, 0);
@@ -1511,73 +1511,73 @@ const categoryConfig = {
     '猝死': {
         name: '猝死',
         keywords: ["猝死", "暴斃", "心臟驟停", "心肌梗塞", "腦溢血", "器官衰竭", "突然死亡", "不治"],
-        color: '#ff2a2a',
+        color: '#ff3333',  // Increased brightness for better contrast
         priority: 1
     },
     '天災': {
         name: '天災',
         keywords: ["地震", "海嘯", "颱風", "颶風", "洪水", "水災", "旱災", "雪災", "龍捲風", "山泥傾瀉", "土石流"],
-        color: '#8b4513',
+        color: '#b36b2e',  // Increased brightness for better contrast
         priority: 2
     },
     '經濟': {
         name: '經濟',
         keywords: ["破產", "倒閉", "裁員", "失業", "金融危機", "經濟衰退", "股災", "債務", "通脹"],
-        color: '#ffae00',
+        color: '#ffb820',  // Slightly brighter orange
         priority: 3
     },
     '醫藥': {
         name: '醫藥',
         keywords: ["疫情", "病毒", "癌症", "疾病", "醫療事故", "藥物", "傳染病", "流感", "疫苗", "病危", "昏迷"],
-        color: '#00ff41',
+        color: '#00ff55',  // Slightly brighter green
         priority: 4
     },
     '工業意外': {
         name: '工業意外',
         keywords: ["工傷", "工業意外", "工地", "施工", "塌陷", "爆炸", "化學品", "工廠", "職業災害"],
-        color: '#ff6600',
+        color: '#ff7722',  // Brighter orange-red
         priority: 5
     },
     '交通': {
         name: '交通',
         keywords: ["車禍", "交通意外", "撞車", "翻車", "失控", "交通事故", "飛機", "火車", "船難", "墮海"],
-        color: '#00f3ff',
+        color: '#00f5ff',  // Slightly brighter cyan
         priority: 6
     },
     '火警': {
         name: '火警',
         keywords: ["火警", "火災", "大火", "燒傷", "爆炸", "燃燒", "火場", "濃煙"],
-        color: '#ff4500',
+        color: '#ff5522',  // Brighter orange-red
         priority: 7
     },
     'AI安全': {
         name: 'AI安全',
         keywords: ["人工智能", "AI", "機器人", "自動化", "算法", "數據洩露", "網絡攻擊", "黑客", "科技事故"],
-        color: '#9370db',
+        color: '#a888ff',  // Increased brightness for purple
         priority: 8
     },
     '悲劇': {
         name: '悲劇',
         keywords: ["自殺", "輕生", "跳樓", "墮樓", "燒炭", "尋死", "自盡", "悲劇"],
-        color: '#4b0082',
+        color: '#7722cc',  // Brighter deep purple
         priority: 9
     },
     '治安': {
         name: '治安',
         keywords: ["謀殺", "兇殺", "襲擊", "槍擊", "刀傷", "暴力", "搶劫", "綁架", "恐襲", "恐怖襲擊"],
-        color: '#dc143c',
+        color: '#ff2244',  // Brighter crimson
         priority: 10
     },
     '宗教末世': {
         name: '宗教末世',
         keywords: ["預言", "末世", "啟示錄", "災難", "審判", "天啟", "終結", "末日"],
-        color: '#a855f7',
+        color: '#bb66ff',  // Brighter purple
         priority: 11
     },
     '離世': {
         name: '離世',
         keywords: ["離世", "過身", "逝世", "死亡", "身亡", "去世", "喪生", "罹難", "宣告死亡"],
-        color: '#696969',
+        color: '#888888',  // Brighter gray for better contrast
         priority: 12
     }
 };
@@ -1746,7 +1746,13 @@ function renderList(events) {
     
     // Show message if no results
     if (events.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">沒有符合的記錄</div>';
+        container.innerHTML = `
+            <div style="text-align:center; padding: 60px 20px; margin: 40px auto; max-width: 500px; border: 2px dashed var(--c-dim); border-radius: 8px; background: rgba(58, 74, 90, 0.1);">
+                <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">📭</div>
+                <div style="font-size: 20px; font-weight: 600; color: var(--c-accent); margin-bottom: 8px;">沒有符合的記錄</div>
+                <div style="font-size: 14px; color: var(--c-dim); margin-top: 12px;">請嘗試調整篩選條件或清除篩選</div>
+            </div>
+        `;
     }
 }
 
@@ -1848,6 +1854,9 @@ function filterEvents() {
     currentPage = 1; // Reset to first page when filtering
     renderList(filteredEvents);
     updateStats(filteredEvents);
+    
+    // Scroll to top of list when filters are applied
+    document.getElementById('log-stream').scrollTop = 0;
 }
 
 // === 同齡過濾 ===
@@ -2014,10 +2023,45 @@ function autoLoadData() {
 // Function to load external JSON data (ready for future use)
 // Usage: Call loadExternalJSON('https://api.example.com/events.json') to load data from external API
 // This replaces the default data.txt loading mechanism
+/**
+ * Load data from external JSON endpoint
+ * 
+ * Expected JSON format: Array of objects with the following shape:
+ * [
+ *   {
+ *     "date": "2026-01-31",           // Required: ISO date string
+ *     "title": "事件標題",             // Required: Event title
+ *     "url": "https://...",            // Required: Source URL
+ *     "age": 45,                       // Optional: Age (number)
+ *     "category": "猝死"               // Optional: Category (will auto-categorize if missing)
+ *   }
+ * ]
+ * 
+ * Valid categories: 猝死, 天災, 經濟, 醫藥, 工業意外, 交通, 火警, AI安全, 悲劇, 治安, 宗教末世, 離世
+ */
 function loadExternalJSON(url) {
+    // Show loading state
+    const container = document.getElementById('log-stream');
+    container.innerHTML = `
+        <div style="text-align:center; padding: 80px 20px;">
+            <div style="font-size: 48px; margin-bottom: 16px; animation: pulse 1.5s infinite;">⏳</div>
+            <div style="font-size: 18px; color: var(--c-accent);">正在載入外部資料...</div>
+            <div style="font-size: 14px; color: var(--c-dim); margin-top: 8px;">${url}</div>
+        </div>
+    `;
+    
     fetch(url)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            if (!Array.isArray(data)) {
+                throw new Error('Expected JSON array, got ' + typeof data);
+            }
+            
             // Convert JSON to internal format
             allEvents = data.map(item => ({
                 date: item.date || '',
@@ -2032,7 +2076,20 @@ function loadExternalJSON(url) {
             updateStats(filteredEvents);
             console.log(`✅ Loaded ${allEvents.length} events from external JSON`);
         })
-        .catch(err => console.error('Failed to load external JSON:', err));
+        .catch(err => {
+            // Show error state with detailed message
+            console.error('Failed to load external JSON:', err);
+            container.innerHTML = `
+                <div style="text-align:center; padding: 60px 20px; margin: 40px auto; max-width: 600px; border: 2px solid var(--c-fatal); border-radius: 8px; background: rgba(255, 42, 42, 0.1);">
+                    <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                    <div style="font-size: 20px; font-weight: 600; color: var(--c-fatal); margin-bottom: 8px;">載入外部資料失敗</div>
+                    <div style="font-size: 14px; color: var(--c-dim); margin-top: 12px; font-family: monospace; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 4px; word-break: break-all;">
+                        ${err.message}
+                    </div>
+                    <div style="font-size: 13px; color: var(--c-dim); margin-top: 16px;">請檢查 URL 是否正確，或稍後再試</div>
+                </div>
+            `;
+        });
 }
 
 // === 匯出快照 ===
