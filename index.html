@@ -870,7 +870,7 @@ a[data-lang].active {
 <div class="placeholder-section" style="position: relative; z-index: 1; padding: 20px;">
     <img 
         src="https://images.unsplash.com/photo-1519834785169-98be25ec3f84?w=1200&h=400&fit=crop" 
-        alt="Placeholder - Sky and clouds representing spirituality"
+        alt="Placeholder - Sky and clouds represent spirituality"
         class="placeholder-img"
         loading="lazy"
     />
@@ -1454,13 +1454,6 @@ function toggleCounter() {
     }
 }
 
-// Initialize collapsed on mobile
-if (window.innerWidth <= 600) {
-    document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('death-counter')?.classList.add('collapsed');
-    });
-}
-
 // Return to portal from video stage
 function returnToPortal() {
     closeImmersive();
@@ -1542,6 +1535,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const savedLang = localStorage.getItem('preferred-lang');
     if (savedLang && ['zh-TW', 'zh-CN', 'en'].includes(savedLang)) {
         switchLanguage(savedLang);
+    }
+    
+    // Initialize collapsed counter on mobile
+    if (window.innerWidth <= 600) {
+        document.getElementById('death-counter')?.classList.add('collapsed');
+    }
+});
+
+// Handle window resize for mobile counter
+window.addEventListener('resize', function() {
+    const counter = document.getElementById('death-counter');
+    if (!counter) return;
+    
+    if (window.innerWidth <= 600 && !counter.classList.contains('collapsed')) {
+        counter.classList.add('collapsed');
+    } else if (window.innerWidth > 600 && counter.classList.contains('collapsed')) {
+        counter.classList.remove('collapsed');
     }
 });
 

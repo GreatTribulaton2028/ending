@@ -1708,8 +1708,24 @@ function renderList(events) {
         div.className = `log-item type-${e.category}`;
 
         const ageDisplay = e.age ? `<span class="age-badge">約${e.age}歲</span>` : '';
-        const categoryName = categoryConfig[e.category]?.name || e.category;
-        const categoryColor = categoryConfig[e.category]?.color || '#666';
+        
+        // Get category display name with fallback for legacy categories
+        let categoryName, categoryColor;
+        if (categoryConfig[e.category]) {
+            categoryName = categoryConfig[e.category].name;
+            categoryColor = categoryConfig[e.category].color;
+        } else {
+            // Legacy category fallback
+            const legacyNames = {
+                'FATAL': '致命',
+                'CRIT': '危急',
+                'ACC': '意外',
+                'OTHER': '其他'
+            };
+            categoryName = legacyNames[e.category] || '其他';
+            categoryColor = '#666';
+        }
+        
         const categoryBadge = `<span class="category-badge" style="background:${categoryColor};">${categoryName}</span>`;
         const eventId = `${e.date}-${e.title.slice(0, 20)}`;
         const isLit = candleCounts[eventId] > 0;
@@ -1996,6 +2012,8 @@ function autoLoadData() {
 }
 
 // Function to load external JSON data (ready for future use)
+// Usage: Call loadExternalJSON('https://api.example.com/events.json') to load data from external API
+// This replaces the default data.txt loading mechanism
 function loadExternalJSON(url) {
     fetch(url)
         .then(response => response.json())
@@ -2009,6 +2027,7 @@ function loadExternalJSON(url) {
                 category: item.category || categorize(item.title)
             }));
             filteredEvents = allEvents;
+            currentPage = 1;
             renderList(filteredEvents);
             updateStats(filteredEvents);
             console.log(`✅ Loaded ${allEvents.length} events from external JSON`);
