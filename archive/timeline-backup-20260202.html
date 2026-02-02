@@ -11,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+TC:wght@400;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
     
+    <!-- Hammer.js for swipe gestures -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -769,43 +772,21 @@
             return card;
         }
 
-        // Initialize gestures on a card (using vanilla JS touch events)
+        // Initialize gestures on a card
         function initCardGestures(card) {
-            // Gesture thresholds
-            const TAP_TIME_THRESHOLD = 200; // milliseconds
-            const TAP_DISTANCE_THRESHOLD = 10; // pixels
-            const SWIPE_THRESHOLD = 150; // pixels
-            const INDICATOR_SHOW_THRESHOLD = 50; // pixels
-            const INDICATOR_MAX_DISTANCE = 150; // pixels
-            
+            const hammer = new Hammer(card);
             let startX = 0, startY = 0;
             let currentX = 0, currentY = 0;
-            let isDragging = false;
-            let startTime = 0;
 
-            // Mouse and touch event handlers
-            const onStart = (e) => {
-                const touch = e.touches ? e.touches[0] : e;
-                startX = touch.clientX;
-                startY = touch.clientY;
-                currentX = 0;
-                currentY = 0;
-                isDragging = true;
-                startTime = Date.now();
+            hammer.on('panstart', (e) => {
                 card.classList.add('swiping');
-            };
+                startX = 0;
+                startY = 0;
+            });
 
-            const onMove = (e) => {
-                if (!isDragging) return;
-                
-                const touch = e.touches ? e.touches[0] : e;
-                currentX = touch.clientX - startX;
-                currentY = touch.clientY - startY;
-                
-                // Only prevent default for horizontal swipes to preserve vertical scrolling
-                if (Math.abs(currentX) > Math.abs(currentY)) {
-                    e.preventDefault();
-                }
+            hammer.on('pan', (e) => {
+                currentX = e.deltaX;
+                currentY = e.deltaY;
                 
                 const rotation = currentX / 20;
                 card.style.transform = `translate(${currentX}px, ${currentY}px) rotate(${rotation}deg)`;
@@ -814,22 +795,19 @@
                 const leftIndicator = card.querySelector('.swipe-left');
                 const rightIndicator = card.querySelector('.swipe-right');
                 
-                if (currentX < -INDICATOR_SHOW_THRESHOLD) {
-                    leftIndicator.style.opacity = Math.min(Math.abs(currentX) / INDICATOR_MAX_DISTANCE, 1);
+                if (currentX < -50) {
+                    leftIndicator.style.opacity = Math.min(Math.abs(currentX) / 150, 1);
                     rightIndicator.style.opacity = 0;
-                } else if (currentX > INDICATOR_SHOW_THRESHOLD) {
-                    rightIndicator.style.opacity = Math.min(currentX / INDICATOR_MAX_DISTANCE, 1);
+                } else if (currentX > 50) {
+                    rightIndicator.style.opacity = Math.min(currentX / 150, 1);
                     leftIndicator.style.opacity = 0;
                 } else {
                     leftIndicator.style.opacity = 0;
                     rightIndicator.style.opacity = 0;
                 }
-            };
+            });
 
-            const onEnd = (e) => {
-                if (!isDragging) return;
-                
-                isDragging = false;
+            hammer.on('panend', (e) => {
                 card.classList.remove('swiping');
                 
                 const leftIndicator = card.querySelector('.swipe-left');
@@ -837,16 +815,7 @@
                 leftIndicator.style.opacity = 0;
                 rightIndicator.style.opacity = 0;
 
-                const timeDiff = Date.now() - startTime;
-                const distance = Math.abs(currentX);
-
-                // Check if it was a quick tap (for flipping)
-                if (timeDiff < TAP_TIME_THRESHOLD && distance < TAP_DISTANCE_THRESHOLD) {
-                    flipCard(card);
-                    return;
-                }
-
-                if (Math.abs(currentX) > SWIPE_THRESHOLD) {
+                if (Math.abs(currentX) > 150) {
                     // Swipe threshold reached
                     if (currentX < 0) {
                         swipeLeft(card);
@@ -857,18 +826,13 @@
                     // Return to center
                     card.style.transform = '';
                 }
-            };
+            });
 
-            // Add event listeners for both touch and mouse
-            card.addEventListener('touchstart', onStart, { passive: true });
-            card.addEventListener('touchmove', onMove, { passive: false });
-            card.addEventListener('touchend', onEnd, { passive: true });
-            
-            card.addEventListener('mousedown', onStart);
-            card.addEventListener('mousemove', onMove);
-            card.addEventListener('mouseup', onEnd);
-            card.addEventListener('mouseleave', (e) => {
-                if (isDragging) onEnd(e);
+            // Click to flip
+            card.addEventListener('click', (e) => {
+                if (!card.classList.contains('swiping')) {
+                    flipCard(card);
+                }
             });
         }
 
