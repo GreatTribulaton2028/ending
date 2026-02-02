@@ -1194,7 +1194,7 @@ header { margin-top: 50px; }
         <ul class="nav-links">
             <li><a href="index.html">首頁 Home</a></li>
             <li><a href="monitor.html" class="active">生死記錄儀 Monitor</a></li>
-            <li><a href="mission-briefing.html">任務總覽 Missions</a></li>
+            <li><a href="docs/mission-briefing.html">任務總覽 Missions</a></li>
         </ul>
     </div>
 </nav>
@@ -2096,7 +2096,7 @@ function handleFile(event) {
 // Expected JSON format: Array of objects with {date, title, url, age?, category?}
 // Example: fetch('https://api.example.com/events.json')
 function autoLoadData() {
-    fetch('data.txt')
+    fetch('data/data.txt')
         .then(response => {
             if (!response.ok) throw new Error('data.txt not found');
             return response.text();
