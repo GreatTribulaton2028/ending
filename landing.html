@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生死抉擇 | Life vs Death</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+TC:wght@400;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --c-bg: #030405;
+            --c-panel: rgba(8, 12, 18, 0.95);
+            --c-border: #1a2a3a;
+            --c-accent: #00f3ff;
+            --c-fatal: #ff2a2a;
+            --c-crit: #ffae00;
+            --c-acc: #00ff41;
+            --c-dim: #3a4a5a;
+            --c-soul: #a855f7;
+            --f-mono: 'Share Tech Mono', monospace;
+            --f-head: 'Orbitron', sans-serif;
+            --f-text: 'Noto Sans TC', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--c-bg);
+            font-family: var(--f-text);
+            color: #e0e6ed;
+        }
+
+        /* Main container */
+        #main-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Animated background particles */
+        #particle-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        /* Title section */
+        .title-section {
+            text-align: center;
+            margin-bottom: clamp(50px, 8vh, 80px);
+            animation: fadeIn 1.5s ease-out;
+            z-index: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .title-main {
+            font-family: var(--f-head);
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: 900;
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--c-fatal), var(--c-crit), var(--c-accent), var(--c-soul), var(--c-fatal));
+            background-size: 400% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientFlow 4s linear infinite;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 400% 50%; }
+        }
+
+        .title-subtitle {
+            font-family: var(--f-text);
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: #888;
+            letter-spacing: 4px;
+        }
+
+        /* Choice section */
+        .choice-section {
+            display: flex;
+            gap: clamp(20px, 5vw, 50px);
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeIn 2s ease-out 0.5s both;
+            z-index: 1;
+        }
+
+        .choice-card {
+            width: clamp(250px, 40vw, 350px);
+            padding: clamp(30px, 5vh, 50px);
+            border: 2px solid;
+            border-radius: 12px;
+            background: var(--c-panel);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .choice-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: currentColor;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+
+        .choice-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .choice-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .choice-card.death {
+            border-color: var(--c-fatal);
+            color: var(--c-fatal);
+        }
+
+        .choice-card.death:hover {
+            box-shadow: 0 0 40px rgba(255, 42, 42, 0.5);
+        }
+
+        .choice-card.life {
+            border-color: var(--c-accent);
+            color: var(--c-accent);
+        }
+
+        .choice-card.life:hover {
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.5);
+        }
+
+        .choice-icon {
+            font-size: clamp(3rem, 8vw, 5rem);
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .choice-title {
+            font-family: var(--f-head);
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 900;
+            letter-spacing: 6px;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .choice-desc {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            color: #888;
+            line-height: 1.8;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Hint text */
+        .hint-text {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 2px;
+            animation: pulse 2s infinite;
+            z-index: 1;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Fade out animation */
+        .fade-out {
+            animation: fadeOut 1.5s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+
+        /* Mobile optimization */
+        @media (max-width: 768px) {
+            .choice-section {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .choice-card {
+                width: 90%;
+                max-width: 350px;
+            }
+
+            .title-main {
+                letter-spacing: 4px;
+            }
+
+            .title-subtitle {
+                letter-spacing: 2px;
+            }
+
+            .choice-title {
+                letter-spacing: 3px;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .title-section {
+                margin-bottom: 30px;
+            }
+
+            .choice-card {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particle-bg"></canvas>
+    
+    <div id="main-container">
+        <!-- Title Section -->
+        <div class="title-section">
+            <div class="title-main">生死抉擇</div>
+            <div class="title-subtitle">Life vs Death</div>
+        </div>
+
+        <!-- Choice Section -->
+        <div class="choice-section">
+            <!-- Death Card -->
+            <div class="choice-card death" id="deathCard">
+                <div class="choice-icon">💀</div>
+                <div class="choice-title">死亡</div>
+                <div class="choice-desc">
+                    繼續沉睡<br>
+                    忽略真相
+                </div>
+            </div>
+
+            <!-- Life Card -->
+            <div class="choice-card life" id="lifeCard">
+                <div class="choice-icon">✨</div>
+                <div class="choice-title">生命</div>
+                <div class="choice-desc">
+                    覺醒真相<br>
+                    進入門戶
+                </div>
+            </div>
+        </div>
+
+        <div class="hint-text">選擇你的道路</div>
+    </div>
+
+    <script>
+        // Particle background
+        const canvas = document.getElementById('particle-bg');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 50;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+                this.color = `rgba(0, 243, 255, ${Math.random() * 0.5})`;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        animate();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Button handlers
+        const deathCard = document.getElementById('deathCard');
+        const lifeCard = document.getElementById('lifeCard');
+        const mainContainer = document.getElementById('main-container');
+
+        deathCard.addEventListener('click', function() {
+            mainContainer.classList.add('fade-out');
+            setTimeout(() => {
+                window.close();
+            }, 1500);
+        });
+
+        lifeCard.addEventListener('click', function() {
+            mainContainer.classList.add('fade-out');
+            setTimeout(() => {
+                window.location.href = 'monitor.html';
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
