@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="全球非自然死亡統計 - 自2019年12月1日起">
-    <title>生死之間 | The Reality</title>
+    <meta name="description" content="The Filter - Are you ready?">
+    <title>生死之間 | The Filter</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -171,22 +171,22 @@
             display: block;
         }
 
-        .btn-no {
+        .btn-sleep {
             color: #ff3333;
             border-color: #ff3333;
         }
 
-        .btn-no:hover {
+        .btn-sleep:hover {
             box-shadow: 0 0 30px rgba(255, 51, 51, 0.5);
             transform: translateY(-2px);
         }
 
-        .btn-yes {
+        .btn-awaken {
             color: #00ccff;
             border-color: #00ccff;
         }
 
-        .btn-yes:hover {
+        .btn-awaken:hover {
             box-shadow: 0 0 30px rgba(0, 204, 255, 0.5);
             transform: translateY(-2px);
         }
@@ -232,107 +232,52 @@
     <div id="main-container">
         <!-- Death Counter Section -->
         <div class="counter-section">
-            <div class="counter-label">Global Non-Natural Deaths</div>
-            <div class="counter-title">全球非自然死亡人數</div>
-            <div class="death-counter" id="deathCounter">157,428,392</div>
-            <div class="counter-subtitle">自2019年12月1日起</div>
+            <div class="counter-label">Shocking Death Counter</div>
+            <div class="counter-title">驚人死亡數據</div>
+            <div class="death-counter" id="deathCounter">151,600</div>
+            <div class="counter-subtitle">/ Day</div>
         </div>
 
         <!-- Question Section -->
         <div class="question-section">
-            <div class="question-text">這只是巧合嗎？</div>
-            <div class="question-english">Is this just a coincidence?</div>
+            <div class="question-text">如果下一秒就是終點</div>
+            <div class="question-text">你準備好了嗎？</div>
+            <div class="question-english">If the next second is the end, are you ready?</div>
         </div>
 
         <!-- Buttons Section -->
         <div class="buttons-section">
-            <button class="choice-btn btn-yes" id="btnYes">
-                <span>是，只是巧合</span>
+            <button class="choice-btn btn-sleep" id="btnSleep">
+                <span>繼續沉睡</span>
             </button>
-            <button class="choice-btn btn-no" id="btnNo">
-                <span>不，給我證據</span>
+            <button class="choice-btn btn-awaken" id="btnAwaken">
+                <span>我想甦醒</span>
             </button>
         </div>
     </div>
 
+    <script src="js/progression.js"></script>
     <script>
-        // Death counter animation
-        const counterElement = document.getElementById('deathCounter');
-        const baseNumber = 157428392; // Base number from Dec 1, 2019
-        const startDate = new Date('2019-12-01');
-        const now = new Date();
-        const daysSinceStart = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
-        
-        // Calculate additional deaths (simulated increment based on days passed)
-        // Assuming approximately 157M deaths over ~1850 days = ~85,000 per day
-        const deathsPerDay = 85000;
-        const currentTotal = baseNumber + (daysSinceStart * deathsPerDay);
-        
-        // Counter increment animation
-        let currentCount = baseNumber;
-        const targetCount = currentTotal;
-        const increment = Math.ceil((targetCount - baseNumber) / 100);
-        
-        function animateCounter() {
-            if (currentCount < targetCount) {
-                currentCount += increment;
-                if (currentCount > targetCount) currentCount = targetCount;
-                counterElement.textContent = currentCount.toLocaleString('en-US');
-                setTimeout(animateCounter, 20);
-            } else {
-                // Start real-time increment (simulated)
-                startRealTimeIncrement();
-            }
-        }
-        
-        function startRealTimeIncrement() {
-            setInterval(() => {
-                currentCount += Math.floor(Math.random() * 3) + 1; // Random increment 1-3
-                counterElement.textContent = currentCount.toLocaleString('en-US');
-            }, 1000);
-        }
-        
-        // Start animation on load
-        setTimeout(animateCounter, 500);
-
         // Button handlers
-        const btnYes = document.getElementById('btnYes');
-        const btnNo = document.getElementById('btnNo');
+        const btnSleep = document.getElementById('btnSleep');
+        const btnAwaken = document.getElementById('btnAwaken');
         const mainContainer = document.getElementById('main-container');
 
-        btnYes.addEventListener('click', function() {
-            // Reverse psychology - dismiss them
-            const messages = [
-                '那就祝你好運了... Good luck then...',
-                '享受你剩餘的時光... Enjoy your remaining time...',
-                '有些真相，不是每個人都能承受... Some truths are not for everyone...'
-            ];
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-            
-            alert(randomMessage);
-            
-            // Optional: Close window or redirect away
-            setTimeout(() => {
-                // Try to close (works if opened by script)
-                window.close();
-                // If close doesn't work, redirect to a blank page
-                if (!window.closed) {
-                    window.location.href = 'about:blank';
-                }
-            }, 500);
+        btnSleep.addEventListener('click', function() {
+            alert('Good night...');
+            // Try to close the tab
+            window.close();
+            // If that doesn't work, redirect to blank page
+            if (!window.closed) {
+                window.location.href = 'about:blank';
+            }
         });
 
-        btnNo.addEventListener('click', function() {
-            // Fade out and redirect to timeline
+        btnAwaken.addEventListener('click', function() {
             mainContainer.classList.add('fade-out');
             setTimeout(() => {
-                window.location.href = 'timeline.html';
+                Progression.awaken();
             }, 1500);
-        });
-
-        // Prevent context menu (optional - for more "immersive" experience)
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
         });
     </script>
 </body>

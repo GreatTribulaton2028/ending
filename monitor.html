@@ -1868,6 +1868,11 @@ function lightCandle(el) {
     // 顯示短暫訊息
     el.style.transform = 'translateY(-50%) scale(1.5)';
     setTimeout(() => el.style.transform = '', 300);
+
+    // Check progression for awakening protocol
+    if (typeof Progression !== 'undefined') {
+        Progression.checkMonitorProgress();
+    }
 }
 
 // === 更新統計 ===
@@ -3495,5 +3500,6 @@ function updateDeathCounter() {
 })();
 
 </script>
+<script src="js/progression.js"></script>
 </body>
 </html>

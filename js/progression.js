@@ -1,125 +1,114 @@
 /**
- * TRIBULATION SYSTEM CORE (progression.js)
- * 用於 index.html, monitor.html, timeline.html 的統一狀態管理
+ * Progressive Awakening Protocol - Progression System
+ * Manages user progression through the awakening journey
  */
 
-const TRIB_SYSTEM = {
-    // 狀態存儲鍵值
-    STORAGE_KEY: 'tribulation_progress',
-    
-    // 定義等級 (0-5)
-    LEVELS: {
-        0: { name: "AWAKENING", desc: "初次抵達，僅能看見表象 (首頁)" },
-        1: { name: "AWARENESS", desc: "完成靈魂問答，解鎖監控儀 (Monitor)" },
-        2: { name: "OBSERVER", desc: "在監控儀互動超過 3 次，解鎖時間軸 (Timeline)" },
-        3: { name: "SEEKER", desc: "在時間軸閱讀預言，解鎖深度連結" }
+const Progression = {
+    // localStorage keys
+    KEYS: {
+        LEVEL: 'awakening_level',
+        CANDLES: 'candle_interactions'
     },
 
-    // 獲取當前狀態
-    getState: function() {
-        const saved = localStorage.getItem(this.STORAGE_KEY);
-        return saved ? JSON.parse(saved) : { level: 0, xp: 0, interactions: 0 };
+    /**
+     * Initialize awakening - sets level to 1 and redirects to monitor.html
+     */
+    awaken: function() {
+        localStorage.setItem(this.KEYS.LEVEL, '1');
+        localStorage.setItem(this.KEYS.CANDLES, '0');
+        window.location.href = 'monitor.html';
     },
 
-    // 保存狀態
-    saveState: function(state) {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
-        this.initUI(); // 更新介面
-    },
-
-    // 增加互動經驗 (XP)
-    addInteraction: function(amount = 1) {
-        let state = this.getState();
-        state.interactions += amount;
+    /**
+     * Check monitor progress - increments candle count and checks for level 2 unlock
+     */
+    checkMonitorProgress: function() {
+        const level = parseInt(localStorage.getItem(this.KEYS.LEVEL) || '0');
+        const candles = parseInt(localStorage.getItem(this.KEYS.CANDLES) || '0');
         
-        // 升級邏輯：Level 1 -> 2 (需要 3 次互動)
-        if (state.level === 1 && state.interactions >= 3) {
-            this.levelUp(2);
-        } else {
-            this.saveState(state);
-        }
-    },
-
-    // 執行升級
-    levelUp: function(newLevel) {
-        let state = this.getState();
-        if (newLevel > state.level) {
-            state.level = newLevel;
-            this.saveState(state);
-            this.showNotification(`SYSTEM UPGRADE: ${this.LEVELS[newLevel].name} - ACCESS GRANTED`);
-        }
-    },
-
-    // 檢查並鎖定/解鎖 UI 元素 (在頁面加載時調用)
-    initUI: function() {
-        const state = this.getState();
-        const currentPath = window.location.pathname;
-
-        // 1. 首頁 (index.html) 的邏輯
-        if (currentPath.includes('index') || currentPath === '/' || currentPath.endsWith('.html')) {
-            const monitorGate = document.querySelector('a[href*="monitor"]');
-            const timelineGate = document.querySelector('a[href*="timeline"]');
+        // Increment candle count
+        const newCandles = candles + 1;
+        localStorage.setItem(this.KEYS.CANDLES, newCandles.toString());
+        
+        // Check if eligible for level 2
+        if (newCandles >= 3 && level < 2) {
+            localStorage.setItem(this.KEYS.LEVEL, '2');
+            alert('Permission Elevated: Level 2');
             
-            // Level 0: 鎖住 Monitor 和 Timeline
-            if (state.level < 1) {
-                if (monitorGate) this.lockElement(monitorGate, "COMPLETE 'IF IT WERE YOU' FIRST");
-                if (timelineGate) this.lockElement(timelineGate, "SYSTEM OFFLINE");
-            } else {
-                if (monitorGate) this.unlockElement(monitorGate);
-            }
-
-            // Level 1: 鎖住 Timeline
-            if (state.level < 2) {
-                if (timelineGate) this.lockElement(timelineGate, "INSUFFICIENT DATA. ANALYZE MONITOR FIRST.");
-            } else {
-                if (timelineGate) this.unlockElement(timelineGate);
-            }
+            // Dynamically add timeline access button
+            this.addTimelineButton();
         }
     },
 
-    // 鎖定元素的視覺處理
-    lockElement: function(el, msg) {
-        if (!el || el.classList.contains('locked')) return;
-        el.classList.add('locked');
-        el.style.pointerEvents = 'none';
-        el.style.filter = 'grayscale(1) brightness(0.5)';
-        el.style.opacity = '0.5';
+    /**
+     * Add timeline access button to the page
+     */
+    addTimelineButton: function() {
+        // Check if button already exists
+        if (document.getElementById('timeline-access-btn')) {
+            return;
+        }
+
+        // Create button
+        const button = document.createElement('button');
+        button.id = 'timeline-access-btn';
+        button.textContent = '進入時間軸 | Enter Timeline';
+        button.style.cssText = `
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #00f3ff 0%, #0066ff 100%);
+            color: #000000;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 14px;
+            border: 2px solid #00f3ff;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 10000;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.5);
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        `;
         
-        // 添加鎖頭圖標
-        let lock = document.createElement('div');
-        lock.className = 'lock-overlay';
-        lock.innerHTML = `<div style='position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#ff4444; font-family:monospace; background:rgba(0,0,0,0.8); z-index:10; border-radius:inherit;'>
-            <span style='font-size:24px'>🔒</span>
-            <span style='font-size:10px; margin-top:5px; text-align:center'>${msg}</span>
-        </div>`;
-        el.style.position = 'relative';
-        el.appendChild(lock);
+        // Hover effect
+        button.onmouseover = function() {
+            this.style.transform = 'scale(1.05)';
+            this.style.boxShadow = '0 0 50px rgba(0, 243, 255, 0.8)';
+        };
+        button.onmouseout = function() {
+            this.style.transform = 'scale(1)';
+            this.style.boxShadow = '0 0 30px rgba(0, 243, 255, 0.5)';
+        };
+        
+        // Click handler
+        button.onclick = function() {
+            window.location.href = 'timeline.html';
+        };
+        
+        document.body.appendChild(button);
     },
 
-    // 解鎖元素的視覺處理
-    unlockElement: function(el) {
-        if (!el) return;
-        el.classList.remove('locked');
-        el.style.pointerEvents = 'auto';
-        el.style.filter = 'none';
-        el.style.opacity = '1';
-        const lock = el.querySelector('.lock-overlay');
-        if (lock) lock.remove();
-    },
-
-    // 簡單的通知彈窗
-    showNotification: function(text) {
-        const div = document.createElement('div');
-        div.style.cssText = "position:fixed; bottom:20px; right:20px; background:rgba(0,20,30,0.9); border:1px solid #00f3ff; color:#00f3ff; padding:15px; font-family:monospace; z-index:99999; backdrop-filter:blur(5px); animation: slideIn 0.5s ease-out; box-shadow: 0 0 20px rgba(0,243,255,0.2);";
-        div.innerHTML = `<span style='margin-right:10px'>⚠️</span>${text}`;
-        document.body.appendChild(div);
-        setTimeout(() => {
-            div.style.opacity = '0';
-            div.style.transition = 'opacity 0.5s';
-            setTimeout(() => div.remove(), 500);
-        }, 4000);
+    /**
+     * Verify timeline access - checks if user has level 2 access
+     * If not, alerts and redirects to index.html
+     */
+    verifyTimelineAccess: function() {
+        const level = parseInt(localStorage.getItem(this.KEYS.LEVEL) || '0');
+        
+        if (level < 2) {
+            alert('Access Denied');
+            window.location.href = 'index.html';
+            return false;
+        }
+        return true;
     }
 };
 
-// 自動初始化
-document.addEventListener('DOMContentLoaded', () => TRIB_SYSTEM.initUI());
+// Auto-execute verification if on timeline.html
+if (window.location.pathname.includes('timeline.html')) {
+    document.addEventListener('DOMContentLoaded', function() {
+        Progression.verifyTimelineAccess();
+    });
+}
