@@ -1,294 +1,568 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="The Filter - Are you ready?">
-    <title>生死之間 | The Filter</title>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+TC:wght@400;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生死之間 — LIFE IS WHAT</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --c-bg: #030405;
+    --c-panel: rgba(8, 12, 18, 0.95);
+    --c-border: #1a2a3a;
+    --c-accent: #00f3ff;
+    --c-fatal: #ff2a2a;
+    --c-crit: #ffae00;
+    --c-acc: #00ff41;
+    --c-dim: #3a4a5a;
+    --c-soul: #a855f7;
+    --f-mono: 'Share Tech Mono', monospace;
+    --f-head: 'Orbitron', sans-serif;
+    --f-text: 'Noto Sans TC', sans-serif;
+}
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #000000;
-            font-family: 'Noto Sans TC', sans-serif;
-        }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: var(--c-bg);
+    color: #e0e6ed;
+    font-family: var(--f-text);
+    overflow: hidden; /* 防止滾動，直到進入 Monitor */
+    height: 100vh;
+}
 
-        #main-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+/* ===== 視圖切換系統 ===== */
+.view-container {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
+}
 
-        /* Death Counter Section */
-        .counter-section {
-            text-align: center;
-            margin-bottom: clamp(40px, 8vh, 80px);
-            animation: fadeIn 1.5s ease-out;
-        }
+/* 視圖 1: 紅字衝擊 (Intro) */
+#intro-view {
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+    cursor: pointer;
+}
+#intro-view.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(1.1);
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+/* 視圖 2: 儀表板 (Monitor) */
+#monitor-view {
+    z-index: 50;
+    opacity: 0;
+    overflow-y: auto; /* 允許儀表板滾動 */
+    padding-bottom: 50px;
+}
+#monitor-view.active {
+    opacity: 1;
+}
 
-        .counter-label {
-            font-size: clamp(0.8rem, 2vw, 1rem);
-            color: #888888;
-            letter-spacing: 3px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            font-weight: 400;
-        }
+/* ===== Intro 樣式 ===== */
+.huge-number {
+    font-family: var(--f-head);
+    font-size: clamp(4rem, 15vw, 12rem);
+    color: var(--c-fatal);
+    font-weight: 900;
+    text-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
+    line-height: 1;
+    animation: heartBeat 1.5s infinite;
+}
+.intro-sub {
+    font-family: var(--f-mono);
+    color: #666;
+    margin-top: 20px;
+    letter-spacing: 2px;
+    font-size: clamp(12px, 2vw, 16px);
+}
+.glitch-text {
+    position: relative;
+}
+.glitch-text::before, .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: #000;
+}
+.glitch-text::before {
+    left: 2px; text-shadow: -1px 0 #00ffff;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-1 5s infinite linear alternate-reverse;
+}
+.glitch-text::after {
+    left: -2px; text-shadow: -1px 0 #ff00ff;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-2 5s infinite linear alternate-reverse;
+}
 
-        .counter-title {
-            font-family: 'Noto Serif TC', serif;
-            font-size: clamp(1rem, 3vw, 1.4rem);
-            color: #cccccc;
-            letter-spacing: 4px;
-            margin-bottom: 30px;
-            font-weight: 700;
-        }
+@keyframes heartBeat {
+    0% { transform: scale(1); text-shadow: 0 0 50px rgba(255,0,0,0.5); }
+    15% { transform: scale(1.05); text-shadow: 0 0 80px rgba(255,0,0,0.8); }
+    30% { transform: scale(1); text-shadow: 0 0 50px rgba(255,0,0,0.5); }
+    45% { transform: scale(1.02); text-shadow: 0 0 60px rgba(255,0,0,0.6); }
+    60% { transform: scale(1); text-shadow: 0 0 50px rgba(255,0,0,0.5); }
+}
+@keyframes glitch-anim-1 {
+    0% { clip: rect(20px, 9999px, 80px, 0); }
+    20% { clip: rect(60px, 9999px, 10px, 0); }
+    100% { clip: rect(10px, 9999px, 90px, 0); }
+}
 
-        .death-counter {
-            font-family: 'Orbitron', monospace;
-            font-size: clamp(3rem, 12vw, 7rem);
-            font-weight: 900;
-            color: #ff3333;
-            letter-spacing: 0.05em;
-            line-height: 1;
-            text-shadow: 
-                0 0 30px rgba(255, 51, 51, 0.8),
-                0 0 60px rgba(255, 51, 51, 0.5),
-                0 0 90px rgba(255, 51, 51, 0.3);
-            animation: pulse 2s ease-in-out infinite;
-            margin-bottom: 15px;
-        }
+/* ===== Monitor 共用樣式 ===== */
+.monitor-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr 320px;
+    gap: 15px;
+    padding: 15px;
+    max-width: 1600px;
+    margin: 0 auto;
+    min-height: calc(100vh - 100px);
+}
+.panel {
+    background: var(--c-panel);
+    border: 1px solid var(--c-border);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+.p-head {
+    background: rgba(20, 30, 40, 0.8);
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--c-border);
+    font-family: var(--f-head);
+    font-size: 12px;
+    color: var(--c-accent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    letter-spacing: 1px;
+}
 
-        @keyframes pulse {
-            0%, 100% { 
-                text-shadow: 
-                    0 0 30px rgba(255, 51, 51, 0.8),
-                    0 0 60px rgba(255, 51, 51, 0.5),
-                    0 0 90px rgba(255, 51, 51, 0.3);
-            }
-            50% { 
-                text-shadow: 
-                    0 0 40px rgba(255, 51, 51, 1),
-                    0 0 80px rgba(255, 51, 51, 0.7),
-                    0 0 120px rgba(255, 51, 51, 0.4);
-            }
-        }
+@media (max-width: 1024px) {
+    .monitor-grid { grid-template-columns: 1fr; }
+    #ecg-container { display: none; }
+}
 
-        .counter-subtitle {
-            font-size: clamp(0.75rem, 2vw, 0.9rem);
-            color: #666666;
-            letter-spacing: 2px;
-            font-family: 'Orbitron', monospace;
-        }
-
-        /* Question Section */
-        .question-section {
-            text-align: center;
-            margin-bottom: clamp(35px, 6vh, 60px);
-            animation: fadeIn 2s ease-out 0.5s both;
-        }
-
-        .question-text {
-            font-family: 'Noto Serif TC', serif;
-            font-size: clamp(1.5rem, 5vw, 2.5rem);
-            font-weight: 900;
-            color: #ffffff;
-            letter-spacing: 6px;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-            margin-bottom: 15px;
-        }
-
-        .question-english {
-            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
-            color: #999999;
-            letter-spacing: 2px;
-            font-weight: 400;
-        }
-
-        /* Button Section */
-        .buttons-section {
-            display: flex;
-            gap: clamp(15px, 4vw, 30px);
-            flex-wrap: wrap;
-            justify-content: center;
-            animation: fadeIn 2.5s ease-out 1s both;
-        }
-
-        .choice-btn {
-            font-family: 'Noto Sans TC', sans-serif;
-            font-size: clamp(0.95rem, 2.5vw, 1.2rem);
-            font-weight: 700;
-            padding: clamp(15px, 3vh, 20px) clamp(30px, 6vw, 50px);
-            border: 2px solid;
-            background: transparent;
-            cursor: pointer;
-            letter-spacing: 4px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            min-width: 200px;
-        }
-
-        .choice-btn::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: currentColor;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 0;
-        }
-
-        .choice-btn:hover::before {
-            opacity: 0.1;
-        }
-
-        .choice-btn span {
-            position: relative;
-            z-index: 1;
-            display: block;
-        }
-
-        .btn-sleep {
-            color: #ff3333;
-            border-color: #ff3333;
-        }
-
-        .btn-sleep:hover {
-            box-shadow: 0 0 30px rgba(255, 51, 51, 0.5);
-            transform: translateY(-2px);
-        }
-
-        .btn-awaken {
-            color: #00ccff;
-            border-color: #00ccff;
-        }
-
-        .btn-awaken:hover {
-            box-shadow: 0 0 30px rgba(0, 204, 255, 0.5);
-            transform: translateY(-2px);
-        }
-
-        /* Exit Animation */
-        .fade-out {
-            animation: fadeOut 1.5s ease-out forwards;
-        }
-
-        @keyframes fadeOut {
-            to { opacity: 0; }
-        }
-
-        /* Mobile Optimization */
-        @media (max-width: 600px) {
-            .counter-label,
-            .counter-title,
-            .counter-subtitle {
-                letter-spacing: 2px;
-            }
-
-            .question-text {
-                letter-spacing: 3px;
-            }
-
-            .choice-btn {
-                letter-spacing: 2px;
-                min-width: 160px;
-            }
-        }
-
-        @media (max-height: 700px) {
-            .counter-section {
-                margin-bottom: 30px;
-            }
-            .question-section {
-                margin-bottom: 25px;
-            }
-        }
-    </style>
+/* 模態視窗樣式 */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.95); z-index: 999;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.5s;
+    backdrop-filter: blur(5px);
+}
+.modal-overlay.active { opacity: 1; pointer-events: all; }
+.modal-content {
+    width: 90%; max-width: 800px;
+    background: #0a0a0a; border: 1px solid var(--c-dim);
+    border-radius: 8px; padding: 30px; text-align: center;
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
+}
+.modal-step { display: none; }
+.modal-step.active { display: block; animation: fadeIn 0.5s; }
+.btn-choice {
+    background: transparent; border: 1px solid var(--c-accent); color: var(--c-accent);
+    padding: 15px 30px; margin: 10px; font-family: var(--f-head);
+    cursor: pointer; transition: 0.3s; font-size: 16px;
+}
+.btn-choice:hover { background: var(--c-accent); color: #000; box-shadow: 0 0 20px var(--c-accent); }
+.btn-amen {
+    background: var(--c-soul); border: none; color: #fff;
+    padding: 10px 40px; border-radius: 30px; font-size: 18px;
+    margin-top: 20px; cursor: pointer;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+}
+@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pulse { 0%,100% { opacity:0.5; } 50% { opacity:1; } }
+</style>
 </head>
 <body>
-    <div id="main-container">
-        <!-- Death Counter Section -->
-        <div class="counter-section">
-            <div class="counter-label">Shocking Death Counter</div>
-            <div class="counter-title">驚人死亡數據</div>
-            <div class="death-counter" id="deathCounter">151,600</div>
-            <div class="counter-subtitle">/ Day</div>
+
+<!-- 視圖 1: 紅字衝擊 -->
+<div id="intro-view" class="view-container" onclick="enterMonitor()">
+    <div class="huge-number glitch-text" id="death-ticker" data-text="0">0</div>
+    <div class="intro-sub">全球離世人數 (自您進入頁面)</div>
+    <div style="margin-top:50px; border:1px solid #333; padding:10px 30px; border-radius:30px; opacity:0.7; font-size:12px; transition:0.3s;">
+        [ 點擊任意處進入 ]
+    </div>
+</div>
+
+<!-- 視圖 2: 儀表板 -->
+<div id="monitor-view" class="view-container">
+    <!-- Header -->
+    <header style="padding:15px; border-bottom:2px solid var(--c-fatal); display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.8);">
+        <div>
+            <div style="font-family:var(--f-head); font-size:24px; color:var(--c-fatal);">VITAL LIFE MONITOR</div>
+            <div style="font-size:12px; color:#666; font-family:var(--f-mono);">V9.0 | GLOBAL DEATH WATCH</div>
+        </div>
+        <!-- 裝飾用心電圖 -->
+        <div id="ecg-container" style="width:200px; height:50px; border:1px solid #333; background:#000; position:relative; overflow:hidden;">
+            <canvas id="ecg-canvas" style="width:100%; height:100%; opacity:0.8;"></canvas>
+        </div>
+    </header>
+
+    <div class="monitor-grid">
+        <!-- 左側面板：全球事件流 -->
+        <div class="panel">
+            <div class="p-head">
+                <span>📡 INCOMING FEED</span>
+                <span>每秒約 2.0 人離世</span>
+            </div>
+            <!-- 搜尋與過濾 -->
+            <div style="padding:10px; border-bottom:1px solid var(--c-border); display:flex; gap:5px;">
+                <input type="text" id="search-input" placeholder="搜尋..." 
+                       style="flex:1; background:#111; border:1px solid #333; color:#fff; padding:5px; font-family:var(--f-mono);">
+            </div>
+            <div id="log-stream" style="flex:1; overflow-y:auto; font-family:var(--f-mono); font-size:12px; padding:10px;">
+                <!-- JS 將在此填入數據 -->
+                <div style="padding:20px; text-align:center; color:#666;">初始化數據鏈接中...</div>
+            </div>
         </div>
 
-        <!-- Question Section -->
-        <div class="question-section">
-            <div class="question-text">如果下一秒就是終點</div>
-            <div class="question-text">你準備好了嗎？</div>
-            <div class="question-english">If the next second is the end, are you ready?</div>
+        <!-- 中間面板：你的生命儀表板 -->
+        <div class="panel">
+            <div class="p-head">
+                <span>👤 YOUR VITAL STATUS</span>
+                <span>生命倒數</span>
+            </div>
+            
+            <!-- 哲理橫幅 -->
+            <div style="padding:20px; text-align:center; border-bottom:1px solid #333; background:rgba(255,255,255,0.02);">
+                <div id="random-quote" style="font-size:16px; font-style:italic; color:#ddd; margin-bottom:5px;">"人生自古誰無死，留取丹心照汗青"</div>
+                <div id="quote-source" style="font-size:12px; color:#666;">— 文天祥</div>
+            </div>
+
+            <!-- 數據網格 -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:15px;">
+                <div style="background:rgba(0,0,0,0.3); padding:15px; text-align:center; border:1px solid #333;">
+                    <div style="font-size:11px; color:#888;">你已活了 (天)</div>
+                    <div id="days-lived" style="font-family:var(--f-head); font-size:28px; color:#fff;">---</div>
+                </div>
+                <div style="background:rgba(0,0,0,0.3); padding:15px; text-align:center; border:1px solid var(--c-crit);">
+                    <div style="font-size:11px; color:#888;">假設剩餘 (天)</div>
+                    <div id="days-left" style="font-family:var(--f-head); font-size:28px; color:var(--c-crit);">---</div>
+                </div>
+            </div>
+
+            <!-- 生命進度 -->
+            <div style="padding:15px; margin:10px 15px; background:rgba(0,0,0,0.5); border:1px solid #333;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
+                    <span>LIFE PROGRESS</span>
+                    <span id="life-percent">0%</span>
+                </div>
+                <div style="height:8px; background:#111; border-radius:4px; overflow:hidden;">
+                    <div id="life-bar" style="height:100%; width:0%; background:var(--c-accent); transition:width 1s;"></div>
+                </div>
+                <div style="margin-top:10px; text-align:center;">
+                    <input type="number" id="user-age" value="30" min="1" max="100" 
+                           style="background:#111; border:1px solid #444; color:#fff; padding:4px; width:50px; text-align:center;">
+                    <span style="font-size:12px; color:#888;">歲 (輸入後按 Enter)</span>
+                </div>
+            </div>
+            
+            <!-- 每日經文 -->
+            <div style="padding:20px; border-top:1px solid var(--c-border); margin-top:auto;">
+                <div style="color:var(--c-acc); font-size:12px; margin-bottom:5px;">📖 每日智慧</div>
+                <div style="font-size:14px; line-height:1.6; color:#ddd;">
+                    "其實明天如何，你們還不知道。你們的生命是甚麼呢？你們原來是一片雲霧，出現少時就不見了。"
+                </div>
+            </div>
         </div>
 
-        <!-- Buttons Section -->
-        <div class="buttons-section">
-            <button class="choice-btn btn-sleep" id="btnSleep">
-                <span>繼續沉睡</span>
-            </button>
-            <button class="choice-btn btn-awaken" id="btnAwaken">
-                <span>我想甦醒</span>
-            </button>
+        <!-- 右側面板：出路 -->
+        <div class="panel">
+            <div class="p-head">
+                <span>⚖️ THE WAY OUT</span>
+                <span>永恆視角</span>
+            </div>
+
+            <div style="padding:20px; border-bottom:1px solid #333;">
+                <h3 style="color:var(--c-soul); margin-bottom:10px;">今生 vs 永恆</h3>
+                <p style="font-size:13px; color:#aaa; line-height:1.6;">
+                    肉體會朽壞，榮華如花草凋謝。<br>
+                    靈魂卻是永存的，你要往何處去？
+                </p>
+            </div>
+
+            <div style="padding:20px; border-bottom:1px solid #333;">
+                <h3 style="color:var(--c-acc); margin-bottom:10px;">甦醒 vs 昏沉</h3>
+                <p style="font-size:13px; color:#aaa; line-height:1.6;">
+                    昏沉者：日復一日，不問歸期。<br>
+                    甦醒者：數算日子，為永恆預備。
+                </p>
+            </div>
+
+            <!-- IF IT WERE YOU 按鈕 -->
+            <div onclick="openModal()" 
+                 style="margin-top:auto; padding:30px; background:linear-gradient(135deg, #220505, #000); 
+                        border-top:2px solid var(--c-fatal); text-align:center; cursor:pointer; transition:0.3s;">
+                <div style="font-family:var(--f-head); font-size:24px; color:var(--c-fatal); letter-spacing:2px;">IF IT WERE YOU</div>
+                <div style="font-size:12px; color:#666; margin-top:5px;">如果是你？</div>
+                <div style="font-size:11px; color:#ff4444; margin-top:10px; animation:pulse 2s infinite;">[ 點擊尋找出路 ]</div>
+            </div>
         </div>
     </div>
+</div>
 
-    <script src="js/progression.js"></script>
-    <script>
-        // First-time visitor redirect check (before any content loads)
-        (function() {
-            const hasVisitedLanding = localStorage.getItem('hasVisitedLanding');
-            if (!hasVisitedLanding) {
-                // First time visitor - redirect to landing page immediately
-                window.location.href = 'landing.html';
-                return;
-            }
-        })();
+<!-- 模態視窗結構 -->
+<div class="modal-overlay" id="modal-root">
+    <div class="modal-content">
+        <!-- 步驟 1: 選擇 -->
+        <div class="modal-step active" id="step-1">
+            <h2 style="font-family:var(--f-head); color:var(--c-accent); margin-bottom:20px;">選擇你的路徑</h2>
+            <p style="color:#ccc; margin-bottom:30px;">如果生命只剩最後一分鐘，你想抓住什麼？</p>
+            <button class="btn-choice" onclick="goToStep2('bridge')">福音橋 (Gospel Bridge)</button>
+            <button class="btn-choice" onclick="goToStep2('colors')">五色福音 (5 Colors)</button>
+            <div style="margin-top:20px; font-size:12px; color:#666; cursor:pointer;" onclick="closeModal()">[ 取消返回 ]</div>
+        </div>
 
-        // Button handlers
-        const btnSleep = document.getElementById('btnSleep');
-        const btnAwaken = document.getElementById('btnAwaken');
-        const mainContainer = document.getElementById('main-container');
+        <!-- 步驟 2: 禱告/確認 -->
+        <div class="modal-step" id="step-2">
+            <h2 style="color:var(--c-soul);">在你觀看之前...</h2>
+            <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:8px; margin:20px 0; text-align:left; font-size:14px; line-height:1.6;">
+                <p>這不僅僅是一個影片，這是一個關於你靈魂歸宿的邀請。</p>
+                <p>如果你願意打開心門，請在心中默念：「我願意了解真理。」</p>
+            </div>
+            <button class="btn-amen" onclick="goToStep3()">阿們 (AMEN)</button>
+        </div>
 
-        btnSleep.addEventListener('click', function() {
-            alert('Good night...');
-            // Try to close the tab
-            window.close();
-            // If that doesn't work, redirect to blank page
-            if (!window.closed) {
-                window.location.href = 'about:blank';
-            }
-        });
+        <!-- 步驟 3: 播放影片 -->
+        <div class="modal-step" id="step-3">
+            <div style="position:relative; width:100%; padding-bottom:56.25%; background:#000; margin-bottom:15px;">
+                <div id="video-placeholder" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#555;">
+                    [ 影片訊號建立中... ]
+                </div>
+                <iframe id="video-frame" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe>
+            </div>
+            
+            <!-- 模擬資料傳輸進度條 -->
+            <div style="display:flex; justify-content:space-between; color:var(--c-accent); font-size:10px; font-family:var(--f-mono);">
+                <span>DATA TRANSFER...</span>
+                <span id="video-timer">00:00</span>
+            </div>
+            <div style="height:2px; background:#222; width:100%; margin-top:5px;">
+                <div id="transfer-bar" style="height:100%; background:var(--c-accent); width:0%;"></div>
+            </div>
 
-        btnAwaken.addEventListener('click', function() {
-            mainContainer.classList.add('fade-out');
-            setTimeout(() => {
-                Progression.awaken();
-            }, 1500);
-        });
-    </script>
+            <!-- 4分30秒後出現的選項 -->
+            <div id="final-options" style="margin-top:30px; display:none; opacity:0; transition:opacity 1s;">
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <a href="https://e.pcloud.link/publink/show?code=kZt8zaZd7iPCbuRK7mXuE6Lg4fjEJ933Sr7" target="_blank" class="btn-choice" style="border-color:var(--c-acc); color:var(--c-acc); text-decoration:none;">
+                        📥 下載聖經資訊 (pCloud)
+                    </a>
+                    <a href="good-news.html" class="btn-choice" style="border-color:var(--c-fatal); color:var(--c-fatal); text-decoration:none;">
+                        🔴 了解世界的末了 (Seven Years)
+                    </a>
+                    <button onclick="closeModal()" style="background:transparent; border:none; color:#666; cursor:pointer; margin-top:10px;">
+                        返回監控儀表板
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== 配置區 =====
+const CONFIG = {
+    deathRatePerSec: 2.0, // WHO 2.0 標準
+    targetDate: new Date('2027-10-01'), // 吹角節
+    videoLinks: {
+        // 請在此填入從 pCloud 取得的真實影片連結 (Embed URL)
+        bridge: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1", // 範例(請替換)
+        colors: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"  // 範例(請替換)
+    }
+};
+
+// 全域變數
+let deathCount = 0;
+let deathInterval;
+
+// ===== 1. 啟動流程 =====
+document.addEventListener('DOMContentLoaded', () => {
+    startDeathCounter();
+    initECG();
+    updateLifeStats();
+    
+    // 綁定年齡輸入
+    document.getElementById('user-age').addEventListener('change', (e) => {
+        updateLifeStats(e.target.value);
+    });
+
+    // 模擬載入日誌
+    mockLogData();
+});
+
+function startDeathCounter() {
+    // 快速跳動的數字效果
+    const ticker = document.getElementById('death-ticker');
+    deathInterval = setInterval(() => {
+        deathCount += CONFIG.deathRatePerSec / 10; // 每 100ms 更新一次
+        ticker.innerText = Math.floor(deathCount).toLocaleString();
+        ticker.setAttribute('data-text', Math.floor(deathCount));
+    }, 100);
+}
+
+// ===== 2. 進入 Monitor =====
+function enterMonitor() {
+    // 停止首頁計數器動畫，改為後台運行
+    
+    const intro = document.getElementById('intro-view');
+    const monitor = document.getElementById('monitor-view');
+    
+    intro.classList.add('hidden');
+    
+    setTimeout(() => {
+        intro.style.display = 'none';
+        monitor.classList.add('active');
+        document.body.style.overflow = 'auto'; // 允許滾動
+    }, 1500);
+}
+
+// ===== 3. 生命計算器 =====
+function updateLifeStats(ageInput = 30) {
+    const age = parseInt(ageInput) || 30;
+    const lifeExp = 85;
+    const daysLived = age * 365;
+    const daysLeft = Math.max(0, (lifeExp - age) * 365);
+    const percent = Math.min(100, ((age / lifeExp) * 100)).toFixed(1);
+
+    document.getElementById('days-lived').innerText = daysLived.toLocaleString();
+    document.getElementById('days-left').innerText = daysLeft.toLocaleString();
+    
+    document.getElementById('life-percent').innerText = percent + "%";
+    const bar = document.getElementById('life-bar');
+    bar.style.width = percent + "%";
+
+    // 顏色邏輯
+    if(percent > 80) bar.style.background = 'var(--c-fatal)';
+    else if(percent > 50) bar.style.background = 'var(--c-crit)';
+    else bar.style.background = 'linear-gradient(90deg, var(--c-acc), var(--c-crit))';
+}
+
+// ===== 4. IF IT WERE YOU 模態視窗邏輯 =====
+let currentVideo = '';
+
+function openModal() {
+    document.getElementById('modal-root').classList.add('active');
+    document.getElementById('step-1').classList.add('active');
+    document.getElementById('step-2').classList.remove('active');
+    document.getElementById('step-3').classList.remove('active');
+    document.getElementById('final-options').style.display = 'none';
+}
+
+function closeModal() {
+    document.getElementById('modal-root').classList.remove('active');
+    document.getElementById('video-frame').src = ''; // 停止影片
+}
+
+function goToStep2(videoType) {
+    currentVideo = CONFIG.videoLinks[videoType];
+    document.getElementById('step-1').classList.remove('active');
+    document.getElementById('step-2').classList.add('active');
+}
+
+function goToStep3() {
+    document.getElementById('step-2').classList.remove('active');
+    document.getElementById('step-3').classList.add('active');
+    
+    // 開始播放與計時
+    const frame = document.getElementById('video-frame');
+    frame.src = currentVideo;
+    
+    startVideoTimer();
+}
+
+function startVideoTimer() {
+    let seconds = 0;
+    const targetSeconds = 270; // 4分30秒
+    const timerDisplay = document.getElementById('video-timer');
+    const bar = document.getElementById('transfer-bar');
+    const finalOptions = document.getElementById('final-options');
+    
+    const interval = setInterval(() => {
+        seconds++;
+        
+        // 格式化時間 MM:SS
+        let m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        let s = (seconds % 60).toString().padStart(2, '0');
+        timerDisplay.innerText = `${m}:${s}`;
+        
+        // 進度條
+        let progress = Math.min((seconds / targetSeconds) * 100, 100);
+        bar.style.width = progress + "%";
+        
+        if (seconds >= targetSeconds) {
+            clearInterval(interval);
+            timerDisplay.innerText = "DOWNLOAD COMPLETE";
+            finalOptions.style.display = "block";
+            setTimeout(() => finalOptions.style.opacity = 1, 50);
+        }
+    }, 1000); // 正常速度 1000ms
+}
+
+// ===== 5. 心電圖特效 =====
+function initECG() {
+    const cvs = document.getElementById('ecg-canvas');
+    if(!cvs) return;
+    const ctx = cvs.getContext('2d');
+    let width = cvs.width = cvs.offsetWidth;
+    let height = cvs.height = cvs.offsetHeight;
+    
+    let data = new Array(width).fill(height/2);
+    
+    function draw() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.beginPath();
+        ctx.strokeStyle = '#00ff41';
+        ctx.lineWidth = 1.5;
+        
+        for(let i=0; i<width; i++) {
+            if(i===0) ctx.moveTo(i, data[i]);
+            else ctx.lineTo(i, data[i]);
+        }
+        ctx.stroke();
+        
+        data.shift();
+        let y = height/2;
+        if(Math.random() < 0.02) y = height/2 - 15;
+        else if(Math.random() < 0.02) y = height/2 + 10;
+        else y = height/2 + (Math.random()-0.5)*2;
+        data.push(y);
+        requestAnimationFrame(draw);
+    }
+    draw();
+}
+
+// 模擬日誌 (可替換為實際 API)
+function mockLogData() {
+    const stream = document.getElementById('log-stream');
+    const samples = [
+        { cat: 'FATAL', title: '突發心臟驟停 - 35歲男性, 辦公室倒下', time: '10:05' },
+        { cat: 'CRIT', title: '嚴重車禍 - 屯門公路 3車相撞', time: '09:42' },
+        { cat: 'FATAL', title: '住所昏迷不治 - 72歲獨居長者', time: '09:15' },
+        { cat: 'ACC', title: '工業意外 - 建築地盤高處墮下', time: '08:55' },
+        { cat: 'FATAL', title: 'Unknown Cause - Found unresponsive', time: '08:30' }
+    ];
+    let html = '';
+    samples.forEach(s => {
+        let color = s.cat === 'FATAL' ? 'var(--c-fatal)' : (s.cat === 'CRIT' ? 'var(--c-crit)' : 'var(--c-acc)');
+        html += `<div style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); border-left:3px solid ${color}; margin-bottom:5px;">
+            <span style="color:#666; font-size:10px;">[${s.time}]</span>
+            <span style="color:#ddd;">${s.title}</span>
+        </div>`;
+    });
+    stream.innerHTML = html;
+}
+</script>
 </body>
 </html>
